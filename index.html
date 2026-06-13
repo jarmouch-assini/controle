@@ -92,6 +92,26 @@
   .empty .em{font-size:30px} .empty p{font-size:13.5px;margin-top:8px;max-width:260px;margin-left:auto;margin-right:auto}
   .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:22px;line-height:1.6}
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+  /* Gastos por cartão */
+  .cardgrp{border-top:1px solid var(--line)}
+  .cardgrp:first-child{border-top:none}
+  .cardgrp-head{display:flex;align-items:center;justify-content:space-between;padding:13px 0;cursor:pointer}
+  .cg-name{font-weight:700;font-size:14px;display:flex;align-items:center;gap:8px;min-width:0}
+  .cg-name span.nm2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cg-meta{display:flex;align-items:center;gap:9px;flex-shrink:0}
+  .cg-count{font-size:11px;color:var(--muted);background:#F0F3F6;border-radius:20px;padding:2px 8px;font-weight:600}
+  .cg-tot{font-family:'Bricolage Grotesque';font-weight:800;font-size:16px}
+  .chev{color:var(--muted);transition:transform .2s;font-size:11px}
+  .cardgrp.open .chev{transform:rotate(180deg)}
+  .cardgrp-body{display:none;padding-bottom:6px}
+  .cardgrp.open .cardgrp-body{display:block}
+  .li{display:flex;align-items:center;gap:10px;padding:8px 0 8px 2px;border-top:1px dashed var(--line)}
+  .li .lic{width:30px;height:30px;border-radius:9px;background:#F4F6F8;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .li .lim{flex:1;min-width:0}
+  .li .lid{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .li .lis{font-size:11px;color:var(--muted);margin-top:1px}
+  .li .lia{font-family:'Bricolage Grotesque';font-weight:700;font-size:13.5px}
 </style>
 </head>
 <body>
@@ -165,6 +185,12 @@
   <div class="card">
     <h2>Para onde vai o dinheiro</h2>
     <div id="catBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>Gastos por cartão</h2>
+    <div class="hint">Cada fatura separada por cartão, com a data real da compra. Toque pra abrir.</div>
+    <div id="cardBox" style="margin-top:8px"></div>
   </div>
 
   <div class="card">
@@ -292,6 +318,32 @@ function render(){
       <text x="60" y="56" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="15" fill="#16222E">${brl0(total)}</text>
       <text x="60" y="72" text-anchor="middle" font-family="Inter" font-size="9" fill="#647688">no mês</text></svg>
       <div class="legend">${leg}</div></div>`;
+  }
+
+  // gastos por cartão (todos, agrupado)
+  const cardBox=document.getElementById("cardBox");
+  if(gastos.length===0){
+    cardBox.innerHTML=`<div class="empty"><div class="em">💳</div><p>Nenhum gasto de cartão ainda. Me mande uma fatura que eu separo por cartão.</p></div>`;
+  }else{
+    const groups={};
+    gastos.forEach(g=>{const c=g.cartao||"À vista / Pix / boleto";(groups[c]=groups[c]||[]).push(g);});
+    const keys=Object.keys(groups).sort((a,b)=>groups[b].reduce((s,x)=>s+ +x.valor,0)-groups[a].reduce((s,x)=>s+ +x.valor,0));
+    cardBox.innerHTML=keys.map((c,idx)=>{
+      const items=groups[c].slice().sort((a,b)=>(b.data||"").localeCompare(a.data||""));
+      const tot=items.reduce((s,x)=>s+ +x.valor,0);
+      const ic=c.includes("****")?"💳":"👛";
+      const rows=items.map(g=>{
+        const d=new Date(g.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+        const obs=(g.observacao||"").includes("Parcela")?(" · "+g.observacao.split(" - ")[0]):"";
+        return `<div class="li"><div class="lic">${emojiDe(g.categoria,g.descricao)}</div>
+          <div class="lim"><div class="lid">${g.descricao}</div><div class="lis">${d}${g.categoria?" · "+g.categoria:""}${obs}</div></div>
+          <div class="lia">−${brl0(+g.valor)}</div></div>`;
+      }).join("");
+      return `<div class="cardgrp${idx===0?" open":""}"><div class="cardgrp-head" onclick="this.parentNode.classList.toggle('open')">
+        <div class="cg-name">${ic} <span class="nm2">${c}</span></div>
+        <div class="cg-meta"><span class="cg-count">${items.length}</span><span class="cg-tot">${brl0(tot)}</span><span class="chev">▾</span></div>
+      </div><div class="cardgrp-body">${rows}</div></div>`;
+    }).join("");
   }
 
   // lançamentos
