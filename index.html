@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Controle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EAEEF2; --card:#FFFFFF; --ink:#16222E; --muted:#647688;
+    --line:#E2E8EF; --green:#0E9F6E; --green-soft:#E3F5EE;
+    --coral:#F0613C; --coral-soft:#FCE9E2; --gold:#CF9A1F; --gold-soft:#FBF1D8;
+    --shadow:0 1px 2px rgba(22,34,46,.04),0 8px 24px rgba(22,34,46,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;line-height:1.45;
+    padding:18px 16px 60px;max-width:560px;margin:0 auto;font-variant-numeric:tabular-nums;
+  }
+  .top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:20px}
+  .top h1{font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;letter-spacing:-.02em;line-height:1}
+  .top .sub{color:var(--muted);font-size:13px;font-weight:500;margin-top:5px}
+  .refresh{border:1px solid var(--line);background:var(--card);border-radius:11px;padding:9px 13px;
+    font-family:'Inter';font-weight:600;font-size:13px;color:var(--ink);cursor:pointer;display:flex;gap:7px;align-items:center}
+  .refresh:active{transform:scale(.97)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+  .dot.live{background:var(--green)} .dot.offline{background:var(--coral)}
+
+  .hero{background:var(--ink);color:#fff;border-radius:20px;padding:22px 22px 24px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .hero .label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#8FA3B5}
+  .hero .saldo{font-family:'Bricolage Grotesque';font-weight:800;font-size:46px;letter-spacing:-.03em;margin-top:4px;line-height:1}
+  .hero .saldo.neg{color:#FF9C84}
+  .hero .row{display:flex;gap:10px;margin-top:20px}
+  .hero .mini{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:12px 13px}
+  .hero .mini .k{font-size:11px;color:#8FA3B5;font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+  .hero .mini .v{font-family:'Bricolage Grotesque';font-weight:700;font-size:19px;margin-top:3px}
+  .hero .mini .v.g{color:#5FE3B0} .hero .mini .v.c{color:#FFB39C}
+
+  .card{background:var(--card);border-radius:18px;padding:18px;box-shadow:var(--shadow);margin-top:14px}
+  .card h2{font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;letter-spacing:-.01em}
+  .card .hint{color:var(--muted);font-size:12.5px;margin-top:2px}
+
+  .fatura-row{display:flex;gap:10px;margin-top:14px}
+  .fatura-box{flex:1;border:1px solid var(--line);border-radius:13px;padding:13px}
+  .fatura-box .fk{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .fatura-box .fv{font-family:'Bricolage Grotesque';font-weight:800;font-size:22px;margin-top:3px}
+  .fatura-box .fv.gold{color:var(--gold)}
+  .fatura-box .fs{font-size:11px;color:var(--muted);margin-top:2px}
+
+  /* Meta de investimento */
+  .meta-top{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px}
+  .meta-top .big{font-family:'Bricolage Grotesque';font-weight:800;font-size:24px;color:var(--green)}
+  .meta-top .of{font-size:13px;color:var(--muted);font-weight:500}
+  .bar{height:13px;border-radius:8px;background:#EEF2F5;overflow:hidden;margin-top:11px;position:relative}
+  .bar .fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--green),#34C58D);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+  .ticks{display:flex;justify-content:space-between;margin-top:7px;font-size:11.5px;color:var(--muted);font-weight:500}
+  .tick.hit{color:var(--green);font-weight:700}
+
+  /* Sextas */
+  .fris{display:flex;gap:8px;margin-top:14px}
+  .fri{flex:1;border:1px solid var(--line);border-radius:13px;padding:11px 8px;text-align:center;position:relative}
+  .fri.next{border-color:var(--gold);background:var(--gold-soft)}
+  .fri.past{background:#F6F8FA}
+  .fri .d{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .fri .n{font-family:'Bricolage Grotesque';font-weight:800;font-size:20px;margin-top:1px}
+  .fri .val{font-size:11px;font-weight:600;color:var(--ink);margin-top:2px}
+  .fri .inv{font-size:10.5px;font-weight:600;color:var(--green);margin-top:4px}
+  .fri .star{position:absolute;top:-7px;right:-5px;font-size:13px}
+
+  /* Donut */
+  .cat-wrap{display:flex;gap:18px;align-items:center;margin-top:14px}
+  .donut{flex-shrink:0}
+  .legend{flex:1;display:flex;flex-direction:column;gap:9px;min-width:0}
+  .leg{display:flex;align-items:center;gap:9px;font-size:13px}
+  .leg .sw{width:11px;height:11px;border-radius:4px;flex-shrink:0}
+  .leg .nm{flex:1;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .leg .pc{font-weight:700;color:var(--muted);font-size:12px}
+
+  /* Lista */
+  .tx{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+  .tx:first-of-type{border-top:none}
+  .tx .ic{width:38px;height:38px;border-radius:11px;background:var(--coral-soft);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  .tx .meta{flex:1;min-width:0}
+  .tx .desc{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tx .sub{font-size:12px;color:var(--muted);margin-top:1px}
+  .tx .amt{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px}
+
+  .empty{text-align:center;padding:26px 10px;color:var(--muted)}
+  .empty .em{font-size:30px} .empty p{font-size:13.5px;margin-top:8px;max-width:260px;margin-left:auto;margin-right:auto}
+  .foot{text-align:center;color:var(--muted);font-size:11.5px;margin-top:22px;line-height:1.6}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>Meu Controle</h1>
+      <div class="sub" id="periodo">—</div>
+    </div>
+    <button class="refresh" id="btn" onclick="carregar()">
+      <span class="dot" id="dot"></span><span id="btnTxt">Atualizar</span>
+    </button>
+  </div>
+
+  <div class="hero">
+    <div class="label">Caixa agora (nas suas contas)</div>
+    <div class="saldo" id="saldo">R$ 0,00</div>
+    <div class="row">
+      <div class="mini"><div class="k">Entrou</div><div class="v g" id="renda">R$ 0</div></div>
+      <div class="mini"><div class="k">Saiu à vista</div><div class="v c" id="gastos">R$ 0</div></div>
+      <div class="mini"><div class="k">Sextas</div><div class="v" id="qtdSex">0/4</div></div>
+    </div>
+  </div>
+
+  <div class="card" id="cardFatura">
+    <h2>Cartão de crédito</h2>
+    <div class="hint">Compras no cartão não saem agora — entram na fatura do mês que vem.</div>
+    <div class="fatura-row">
+      <div class="fatura-box">
+        <div class="fk">Fatura juntando</div>
+        <div class="fv gold" id="fatura">R$ 0</div>
+        <div class="fs">a pagar mês que vem</div>
+      </div>
+      <div class="fatura-box">
+        <div class="fk">Livre de verdade</div>
+        <div class="fv" id="livre">R$ 0</div>
+        <div class="fs">líquido total − fatura</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="cardReserva">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h2>Reservas</h2>
+        <div class="hint" id="reservaNome">Cofrinho</div>
+      </div>
+      <div style="font-family:'Bricolage Grotesque';font-weight:800;font-size:26px;color:var(--green)" id="reservaSaldo">R$ 0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Meta de investimento</h2>
+    <div class="hint">Separar entre 30% e 40% do que entra — de preferência toda sexta.</div>
+    <div class="meta-top">
+      <span class="big" id="podeInvestir">R$ 0</span>
+      <span class="of">disponível pra investir agora</span>
+    </div>
+    <div class="bar"><div class="fill" id="fill" style="width:0%"></div></div>
+    <div class="ticks">
+      <span class="tick" id="t30">30% · R$ 0</span>
+      <span class="tick" id="t40">40% · R$ 0</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Ritmo das sextas</h2>
+    <div class="hint">R$ 3.500 entram toda sexta. O verde é o quanto investir em cada uma (40%).</div>
+    <div class="fris" id="fris"></div>
+  </div>
+
+  <div class="card">
+    <h2>Para onde vai o dinheiro</h2>
+    <div id="catBox"></div>
+  </div>
+
+  <div class="card">
+    <h2>Últimos lançamentos</h2>
+    <div id="txBox"></div>
+  </div>
+
+  <div class="foot" id="foot">Conectando ao Supabase…</div>
+
+<script>
+const FUNC = "https://imlyadazvnzlcyakgpug.supabase.co/functions/v1/painel";
+
+let renda=[], gastos=[], reservas=[], contas=[];
+
+const PALETA = ["#F0613C","#0E9F6E","#CF9A1F","#3B82C4","#9B59B6","#E0719B","#5FAFA0","#8896A6"];
+const EMOJI = {mercado:"🛒",aliment:"🍽️",comida:"🍽️",rest:"🍔",transporte:"🚗",uber:"🚗",combust:"⛽",casa:"🏠",aluguel:"🏠",luz:"💡",energia:"💡",agua:"💧",internet:"📶",telefone:"📱",saude:"💊",lazer:"🎬",assinatura:"🔁",cartao:"💳",educacao:"📚",pet:"🐾",roupa:"👕"};
+const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const brl0 = v => "R$ "+Math.round(v).toLocaleString("pt-BR");
+const emojiDe = (c,d) => { const s=((c||"")+" "+(d||"")).toLowerCase(); for(const k in EMOJI){if(s.includes(k))return EMOJI[k];} return "💸"; };
+
+function mesAtual(){ const n=new Date(); return {ano:n.getFullYear(), mes:n.getMonth()}; }
+function noMes(dataStr, ref){ const d=new Date(dataStr+"T12:00:00"); return d.getFullYear()===ref.ano && d.getMonth()===ref.mes; }
+
+function sextasDoMes(ref){
+  const out=[]; const d=new Date(ref.ano,ref.mes,1);
+  while(d.getMonth()===ref.mes){ if(d.getDay()===5) out.push(new Date(d)); d.setDate(d.getDate()+1); }
+  return out;
+}
+
+async function carregar(){
+  const dot=document.getElementById("dot"), bt=document.getElementById("btnTxt");
+  let pw = sessionStorage.getItem("painel_pw");
+  if(!pw){ pw = (prompt("Senha do painel:")||"").trim(); }
+  if(!pw){ document.getElementById("foot").textContent="Toque em Atualizar e digite a senha."; return; }
+  bt.textContent="…";
+  try{
+    const resp = await fetch(FUNC+"?pw="+encodeURIComponent(pw));
+    if(resp.status===401){
+      sessionStorage.removeItem("painel_pw");
+      dot.className="dot offline";
+      document.getElementById("foot").textContent="Senha incorreta. Toque em Atualizar pra tentar de novo.";
+      bt.textContent="Atualizar"; return;
+    }
+    if(!resp.ok) throw new Error("http");
+    const d = await resp.json();
+    renda=d.renda||[]; gastos=d.gastos||[]; reservas=d.reservas||[]; contas=d.contas||[];
+    sessionStorage.setItem("painel_pw", pw);
+    dot.className="dot live";
+    document.getElementById("foot").textContent="Conectado ao vivo · privado (protegido por senha)";
+  }catch(e){
+    dot.className="dot offline";
+    document.getElementById("foot").textContent="Nao consegui conectar agora. Toque em Atualizar.";
+  }
+  bt.textContent="Atualizar";
+  render();
+}
+
+function render(){
+  const ref=mesAtual();
+  const rs=renda.filter(x=>noMes(x.data,ref)), gs=gastos.filter(x=>noMes(x.data,ref));
+  const ehCartao=g=>((g.forma_pagamento||"").toLowerCase().includes("cart"));
+  const totContas=(contas||[]).reduce((a,b)=>a+ +b.saldo,0);   // dinheiro real nas contas
+  const totReserva=(reservas||[]).reduce((a,b)=>a+ +b.saldo,0); // cofrinho
+  const totRenda=rs.reduce((a,b)=>a+ +b.valor,0);
+  const gAVista=gs.filter(g=>!ehCartao(g)).reduce((a,b)=>a+ +b.valor,0);
+  const gCartao=gs.filter(g=> ehCartao(g)).reduce((a,b)=>a+ +b.valor,0);
+  const totLiquido=totContas+totReserva;                       // contas + cofrinho
+  const livre=totLiquido-gCartao;                              // total líquido após pagar a fatura
+  const meta30=totRenda*0.3, meta40=totRenda*0.4;
+  const pode=Math.max(0,livre);
+
+  const nomeMes=new Date(ref.ano,ref.mes,1).toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  document.getElementById("periodo").textContent=nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1);
+
+  const sEl=document.getElementById("saldo");
+  sEl.textContent=brl(totContas); sEl.className="saldo"+(totContas<0?" neg":"");
+  document.getElementById("renda").textContent=brl0(totRenda);
+  document.getElementById("gastos").textContent=brl0(gAVista);
+  document.getElementById("fatura").textContent=brl0(gCartao);
+  const lv=document.getElementById("livre"); lv.textContent=brl0(livre);
+
+  // reserva
+  document.getElementById("reservaSaldo").textContent=brl(totReserva);
+  const quebra=(reservas||[]).map(r=>r.nome+" "+brl0(r.saldo)).join("  +  ");
+  document.getElementById("reservaNome").textContent=quebra+"   ·   Líquido total (contas + reservas): "+brl(totLiquido);
+
+  // sextas
+  const hoje=new Date(); const sx=sextasDoMes(ref);
+  const passadas=sx.filter(d=>d<=hoje).length;
+  document.getElementById("qtdSex").textContent=passadas+"/"+sx.length;
+  const friBox=document.getElementById("fris"); friBox.innerHTML="";
+  const proxIdx=sx.findIndex(d=>d>hoje);
+  sx.forEach((d,i)=>{
+    const past=d<=hoje, next=i===proxIdx;
+    const el=document.createElement("div");
+    el.className="fri"+(next?" next":past?" past":"");
+    el.innerHTML=`${next?'<span class="star">⭐</span>':''}
+      <div class="d">Sex</div><div class="n">${String(d.getDate()).padStart(2,"0")}</div>
+      <div class="val">R$ 3.500</div><div class="inv">↑ R$ 1.400</div>`;
+    friBox.appendChild(el);
+  });
+
+  // meta
+  document.getElementById("podeInvestir").textContent=brl0(pode);
+  const pct=meta40>0?Math.min(100,(pode/meta40)*100):0;
+  document.getElementById("fill").style.width=pct+"%";
+  const t30=document.getElementById("t30"), t40=document.getElementById("t40");
+  t30.textContent="30% · "+brl0(meta30); t40.textContent="40% · "+brl0(meta40);
+  t30.className="tick"+(pode>=meta30&&meta30>0?" hit":""); t40.className="tick"+(pode>=meta40&&meta40>0?" hit":"");
+
+  // categorias
+  const catBox=document.getElementById("catBox");
+  if(gs.length===0){
+    catBox.innerHTML=`<div class="empty"><div class="em">🌱</div><p>Nenhum gasto este mês ainda. Me conte no chat — tipo "gastei 80 no mercado" — que aparece aqui.</p></div>`;
+  }else{
+    const map={}; gs.forEach(g=>{const c=g.categoria||"Outros";map[c]=(map[c]||0)+ +g.valor;});
+    const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);
+    const total=arr.reduce((a,b)=>a+b[1],0);
+    let acc=0,segs="";const R=52,C=2*Math.PI*R;
+    arr.forEach((e,i)=>{const frac=e[1]/total;const len=frac*C;
+      segs+=`<circle r="${R}" cx="60" cy="60" fill="none" stroke="${PALETA[i%PALETA.length]}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-acc}" transform="rotate(-90 60 60)"/>`;
+      acc+=len;});
+    const leg=arr.map((e,i)=>`<div class="leg"><span class="sw" style="background:${PALETA[i%PALETA.length]}"></span><span class="nm">${e[0]}</span><span class="pc">${Math.round(e[1]/total*100)}%</span></div>`).join("");
+    catBox.innerHTML=`<div class="cat-wrap"><svg class="donut" width="120" height="120" viewBox="0 0 120 120">${segs}
+      <text x="60" y="56" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="15" fill="#16222E">${brl0(total)}</text>
+      <text x="60" y="72" text-anchor="middle" font-family="Inter" font-size="9" fill="#647688">no mês</text></svg>
+      <div class="legend">${leg}</div></div>`;
+  }
+
+  // lançamentos
+  const txBox=document.getElementById("txBox");
+  if(gastos.length===0){
+    txBox.innerHTML=`<div class="empty"><div class="em">📭</div><p>Sem lançamentos por enquanto.</p></div>`;
+  }else{
+    txBox.innerHTML=gastos.slice(0,12).map(g=>{
+      const d=new Date(g.data+"T12:00:00").toLocaleDateString("pt-BR",{day:"2-digit",month:"short"});
+      return `<div class="tx"><div class="ic">${emojiDe(g.categoria,g.descricao)}</div>
+        <div class="meta"><div class="desc">${g.descricao}</div><div class="sub">${d}${g.categoria?" · "+g.categoria:""}</div></div>
+        <div class="amt">−${brl0(+g.valor)}</div></div>`;
+    }).join("");
+  }
+}
+
+carregar();
+</script>
+</body>
+</html>
