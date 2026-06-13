@@ -196,14 +196,14 @@ function sextasDoMes(ref){
 
 async function carregar(){
   const dot=document.getElementById("dot"), bt=document.getElementById("btnTxt");
-  let pw = sessionStorage.getItem("painel_pw");
+  let pw = localStorage.getItem("painel_pw");
   if(!pw){ pw = (prompt("Senha do painel:")||"").trim(); }
   if(!pw){ document.getElementById("foot").textContent="Toque em Atualizar e digite a senha."; return; }
   bt.textContent="…";
   try{
     const resp = await fetch(FUNC+"?pw="+encodeURIComponent(pw));
     if(resp.status===401){
-      sessionStorage.removeItem("painel_pw");
+      localStorage.removeItem("painel_pw");
       dot.className="dot offline";
       document.getElementById("foot").textContent="Senha incorreta. Toque em Atualizar pra tentar de novo.";
       bt.textContent="Atualizar"; return;
@@ -211,7 +211,7 @@ async function carregar(){
     if(!resp.ok) throw new Error("http");
     const d = await resp.json();
     renda=d.renda||[]; gastos=d.gastos||[]; reservas=d.reservas||[]; contas=d.contas||[];
-    sessionStorage.setItem("painel_pw", pw);
+    localStorage.setItem("painel_pw", pw);
     dot.className="dot live";
     document.getElementById("foot").textContent="Conectado ao vivo · privado (protegido por senha)";
   }catch(e){
