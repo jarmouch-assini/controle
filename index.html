@@ -112,6 +112,16 @@
   .li .lid{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .li .lis{font-size:11px;color:var(--muted);margin-top:1px}
   .li .lia{font-family:'Bricolage Grotesque';font-weight:700;font-size:13.5px}
+
+  /* Moradia em árvore */
+  .cat-wrap{align-items:flex-start}
+  .leg-children{display:flex;flex-direction:column;gap:7px;margin:7px 0 3px 5px;padding-left:11px;border-left:1.5px solid var(--line)}
+  .leg.child{font-size:12px}
+  .leg.child .nm{font-weight:500;color:var(--muted)}
+  .leg.child .pc{color:var(--ink);font-weight:700;font-size:11.5px}
+  .leg.child.zero .nm{opacity:.7}
+  .leg.child.zero .pc{color:var(--muted);font-weight:500}
+  .leg .sw.sm{width:8px;height:8px;border-radius:3px}
 </style>
 </head>
 <body>
@@ -301,19 +311,47 @@ function render(){
   t30.textContent="30% · "+brl0(meta30); t40.textContent="40% · "+brl0(meta40);
   t30.className="tick"+(pode>=meta30&&meta30>0?" hit":""); t40.className="tick"+(pode>=meta40&&meta40>0?" hit":"");
 
-  // categorias
+  // categorias (Moradia em árvore)
   const catBox=document.getElementById("catBox");
   if(gs.length===0){
     catBox.innerHTML=`<div class="empty"><div class="em">🌱</div><p>Nenhum gasto este mês ainda. Me conte no chat — tipo "gastei 80 no mercado" — que aparece aqui.</p></div>`;
   }else{
-    const map={}; gs.forEach(g=>{const c=g.categoria||"Outros";map[c]=(map[c]||0)+ +g.valor;});
+    const MORADIA_ORDER=["Aluguel","Condomínio+água","Luz","Gás","Internet","Celular"];
+    function moradiaSub(g){
+      const s=((g.descricao||"")).toLowerCase();
+      if(s.includes("aluguel")) return "Aluguel";
+      if(s.includes("condom")||s.includes("água")||s.includes("agua")) return "Condomínio+água";
+      if(s.includes("luz")||s.includes("energia")||s.includes("enel")||s.includes("cemig")||s.includes("cpfl")||s.includes("light")||s.includes("eletric")) return "Luz";
+      if(/g[áa]s\b/.test(s)||s.includes("comgas")||s.includes("ultragaz")||s.includes("botij")) return "Gás";
+      if(s.includes("internet")||s.includes("fibra")||s.includes("wifi")||s.includes("banda larga")) return "Internet";
+      if(s.includes("celular")||s.includes("telefone")||s.includes("recarga cel")) return "Celular";
+      return null;
+    }
+    function moradiaDe(g){ const sub=moradiaSub(g); if(sub) return sub; if((g.categoria||"")==="Moradia") return "Aluguel"; return null; }
+    const map={}, moraCh={};
+    gs.forEach(g=>{
+      const md=moradiaDe(g);
+      if(md){ map["Moradia"]=(map["Moradia"]||0)+ +g.valor; moraCh[md]=(moraCh[md]||0)+ +g.valor; }
+      else{ const cc=g.categoria||"Outros"; map[cc]=(map[cc]||0)+ +g.valor; }
+    });
     const arr=Object.entries(map).sort((a,b)=>b[1]-a[1]);
     const total=arr.reduce((a,b)=>a+b[1],0);
     let acc=0,segs="";const R=52,C=2*Math.PI*R;
     arr.forEach((e,i)=>{const frac=e[1]/total;const len=frac*C;
       segs+=`<circle r="${R}" cx="60" cy="60" fill="none" stroke="${PALETA[i%PALETA.length]}" stroke-width="16" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-acc}" transform="rotate(-90 60 60)"/>`;
       acc+=len;});
-    const leg=arr.map((e,i)=>`<div class="leg"><span class="sw" style="background:${PALETA[i%PALETA.length]}"></span><span class="nm">${e[0]}</span><span class="pc">${Math.round(e[1]/total*100)}%</span></div>`).join("");
+    const leg=arr.map((e,i)=>{
+      const color=PALETA[i%PALETA.length];
+      let row=`<div class="leg"><span class="sw" style="background:${color}"></span><span class="nm">${e[0]}</span><span class="pc">${Math.round(e[1]/total*100)}%</span></div>`;
+      if(e[0]==="Moradia"){
+        const kids=MORADIA_ORDER.map(name=>{
+          const val=moraCh[name]||0, has=val>0;
+          return `<div class="leg child${has?"":" zero"}"><span class="sw sm" style="background:${color};opacity:${has?1:.3}"></span><span class="nm">${name}</span><span class="pc">${has?brl0(val):"—"}</span></div>`;
+        }).join("");
+        row+=`<div class="leg-children">${kids}</div>`;
+      }
+      return row;
+    }).join("");
     catBox.innerHTML=`<div class="cat-wrap"><svg class="donut" width="120" height="120" viewBox="0 0 120 120">${segs}
       <text x="60" y="56" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="800" font-size="15" fill="#16222E">${brl0(total)}</text>
       <text x="60" y="72" text-anchor="middle" font-family="Inter" font-size="9" fill="#647688">no mês</text></svg>
