@@ -92,8 +92,8 @@ select{appearance:none;-webkit-appearance:none;background:#f4f6fa url('data:imag
 var BASE='https://imlyadazvnzlcyakgpug.supabase.co/functions/v1/painel';
 var KEY='sb_publishable_MJYvcOZlOuPmt0wFVvRD9w_x9olvLF-';
 var DATA=null,MONTHS=[],SEL=null,CAT='todas',donutChart=null,lineChart=null;
-var KEEP=['Moradia','Alimentação fora','Mercado','Transporte','Lazer','Saúde'];
-var CMAP={'Moradia':'#ff6b5b','Alimentação fora':'#ffa53b','Mercado':'#27c498','Transporte':'#5b8def','Lazer':'#9b6bdf','Saúde':'#ef5b8d','Padaria':'#f2c14e','Família e outros':'#9aa3af'};
+var KEEP=['Cartões','Moradia','Alimentação fora','Mercado','Transporte','Lazer','Saúde'];
+var CMAP={'Cartões':'#3d4659','Moradia':'#ff6b5b','Alimentação fora':'#ffa53b','Mercado':'#27c498','Transporte':'#5b8def','Lazer':'#9b6bdf','Saúde':'#ef5b8d','Padaria':'#f2c14e','Família e outros':'#9aa3af'};
 var MN=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 function num(v){return parseFloat(v||0)||0;}
 function brl(n){return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
@@ -152,6 +152,7 @@ var nodes=el.querySelectorAll('.cbar');for(var k=0;k<nodes.length;k++){(function
 function buildLine(){var cats=KEEP.concat(['Família e outros']);var ds=cats.map(function(c){var data=MONTHS.map(function(m){var s=0;DATA.gastos.forEach(function(g){if(gm(g)===m&&grp(g.categoria)===c)s+=num(g.valor);});return Math.round(s*100)/100;});return{label:c,data:data,borderColor:col(c),backgroundColor:col(c),tension:.35,borderWidth:2,pointRadius:2,fill:false};});var ctx=document.getElementById('line');if(lineChart)lineChart.destroy();lineChart=new Chart(ctx,{type:'line',data:{labels:MONTHS.map(mlab),datasets:ds},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,font:{size:10},padding:8,usePointStyle:true}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+brl(c.parsed.y);}}}},scales:{y:{ticks:{callback:function(v){return 'R$'+(v>=1000?(v/1000)+'k':v);},font:{size:10}},grid:{color:'#f0f2f6'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});}
 start();
 </script></body></html>
+
 
 
 
