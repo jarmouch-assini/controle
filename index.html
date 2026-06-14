@@ -155,6 +155,7 @@ function renderSextas(){var now=new Date();var y,mo;if(SEL==='todos'){y=now.getF
 var CARD_SEL='Mercado Pago',CARD_PAGE=0,CARD_PP=6;
 function cardList(){var s={};DATA.gastos.forEach(function(g){if(g.categoria==='Cartões'&&g.subcategoria)s[g.subcategoria]=1;});(DATA.faturas||[]).forEach(function(f){if(f.cartao)s[f.cartao]=1;});var arr=Object.keys(s).sort();if(!arr.length)arr=['Mercado Pago'];return arr;}
 function renderCartoes(){var el=document.getElementById('cbars');if(!el)return;var selEl=document.getElementById('cardSel');var cards=cardList();if(selEl&&selEl.options.length!==cards.length){var so='';cards.forEach(function(c){so+='<option value="'+c+'">'+c+'</option>';});selEl.innerHTML=so;}
+if(selEl&&selEl.value&&selEl.value!==CARD_SEL){CARD_SEL=selEl.value;CARD_PAGE=0;}
 if(cards.indexOf(CARD_SEL)<0)CARD_SEL=cards[0];if(selEl)selEl.value=CARD_SEL;
 var map={};DATA.gastos.forEach(function(g){if(g.categoria!=='Cartões'||g.subcategoria!==CARD_SEL)return;var m=gm(g);if(!m)return;if(!map[m])map[m]={mes:m,valor:0,prev:false};map[m].valor+=num(g.valor);});(DATA.faturas||[]).forEach(function(f){if((f.cartao||'')!==CARD_SEL||f.pago)return;var m=(f.vencimento||'').slice(0,7);if(!m)return;if(!map[m])map[m]={mes:m,valor:0,prev:true};map[m].valor+=num(f.valor);map[m].prev=true;});
 var all=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.mes<b.mes?-1:1;});
@@ -171,6 +172,7 @@ var nodes=el.querySelectorAll('.cbar');for(var k=0;k<nodes.length;k++){(function
 function buildLine(){var cats=KEEP.concat(['Família e outros']);var ds=cats.map(function(c){var data=MONTHS.map(function(m){var s=0;DATA.gastos.forEach(function(g){if(gm(g)===m&&grp(g.categoria)===c)s+=num(g.valor);});return Math.round(s*100)/100;});return{label:c,data:data,borderColor:col(c),backgroundColor:col(c),tension:.35,borderWidth:2,pointRadius:2,fill:false};});var ctx=document.getElementById('line');if(lineChart)lineChart.destroy();lineChart=new Chart(ctx,{type:'line',data:{labels:MONTHS.map(mlab),datasets:ds},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,font:{size:10},padding:8,usePointStyle:true}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+brl(c.parsed.y);}}}},scales:{y:{ticks:{callback:function(v){return 'R$'+(v>=1000?(v/1000)+'k':v);},font:{size:10}},grid:{color:'#f0f2f6'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});}
 start();
 </script></body></html>
+
 
 
 
