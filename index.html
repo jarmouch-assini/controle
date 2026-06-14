@@ -74,6 +74,18 @@ select{appearance:none;-webkit-appearance:none;background:#f4f6fa url('data:imag
 .est-val{margin-left:auto;text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .est-bar{height:6px;border-radius:4px;background:#eef1f6;overflow:hidden;margin-top:4px}
 .est-bar>i{display:block;height:100%;border-radius:4px;background:#ff6b5b}
+.pv-line{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-top:1px solid var(--line)}
+.pv-line:first-child{border-top:none}
+.pv-line .lab{font-size:14px;color:var(--ink)}
+.pv-line .lab small{display:block;font-size:11.5px;color:var(--mut)}
+.pv-line .val{font-weight:700;font-variant-numeric:tabular-nums}
+.pv-line.tot{border-top:2px solid #e6eaf0;margin-top:4px;padding-top:12px}
+.pv-line.tot .lab{font-weight:700;font-size:15px}
+.pv-line.tot .val{font-size:18px;font-family:'Bricolage Grotesque',Inter}
+.pv-pos{color:#27c498}.pv-neg{color:#ff6b5b}.pv-out{color:#ff6b5b}
+.pv-list{margin-top:8px}
+.pv-item{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut);padding:3px 0}
+.pv-carry{background:#eef4ff;border-radius:10px;padding:8px 10px;margin-top:8px;font-size:12.5px;color:#3d5a96}
 .cbars{display:flex;align-items:flex-end;gap:10px;height:150px;margin:14px 0 6px;padding-top:8px}
 .cbars-wrap{display:flex;align-items:center;gap:6px}
 .cbars-wrap .cbars{flex:1;overflow:hidden;min-width:0}
@@ -123,7 +135,7 @@ var h='<h1 style="font-size:24px;margin:6px 2px 2px">Controle</h1><div class="sm
 +'<div class="card"><div class="ttl">Meta de investimento</div><div id="meta"></div></div>'
 +'<div class="card"><div class="ttl">Reservas guardadas</div><div id="res"></div></div>'
 +'<div class="card"><div class="ttl">Para onde vai o dinheiro</div><div class="selstack"><div class="sr"><span class="sl">Mês</span><select id="mes" onchange="SEL=this.value;renderPeriod()">'+opts+'</select></div><div class="sr"><span class="sl">Categoria</span><select id="cat" onchange="CAT=this.value;renderPeriod()">'+copts+'</select></div></div><div class="row2"><div class="donutWrap"><canvas id="donut"></canvas><div class="donutCenter"><b id="donutTot">-</b><span id="donutSub">no período</span></div></div><div class="tree" id="tree"></div></div></div>'
-+'<div class="card"><div class="ttl">Onde mais gasta</div><div class="small" style="margin-bottom:2px">estabelecimentos que mais pesam no período · vermelho = repetido</div><div id="estabs"></div></div>'
++'<div class="card"><div class="ttl">Previsão do mês</div><div class="small" style="margin-bottom:2px">o que sobra vira saldo do mês seguinte</div><div id="prev"></div></div>'
 +'<div class="card"><div class="ttl" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">Cartões <select id="cardSel" onchange="renderCartoes()" style="min-width:0;font-size:14px"></select></div><div class="small" style="margin-bottom:2px">mês a mês · azul claro = a pagar · toque numa coluna</div><div class="cbars-wrap"><button class="cnav" id="cprev" aria-label="anterior">‹</button><div class="cbars" id="cbars"></div><button class="cnav" id="cnext" aria-label="próximo">›</button></div><div class="cbar-out" id="cbarOut"><b>-</b><span>toque numa coluna</span></div></div>'
 +'<div class="card"><div class="ttl">Gastos por mês</div><div class="small" style="margin-bottom:4px">cada linha é uma categoria, ao longo dos meses</div><div class="lineWrap"><canvas id="line"></canvas></div></div>'
 +'<div class="card"><div class="ttl">Lançamentos <span id="tlMes" class="mut" style="font-size:14px;font-weight:600"></span></div><div class="small" style="margin-bottom:2px">cartão e Pix juntos, na ordem do tempo</div><div class="tl" id="tl"></div></div>'
@@ -148,9 +160,37 @@ var th='';donutData.tree.forEach(function(g){if(g.solo){th+='<div class="trow"><
 var items=DATA.gastos.filter(inSel).slice().sort(function(a,b){return (a.data<b.data?1:a.data>b.data?-1:(b.id-a.id));});var tl='';items.slice(0,80).forEach(function(g){var bdg=g.cartao?g.cartao:(/(saldo)/i.test(g.forma_pagamento||'')?'MP saldo':(g.forma_pagamento||'Pix'));var sub=(g.categoria||'')+(g.subcategoria?' · '+g.subcategoria:'');tl+='<div class="li"><div><div class="desc">'+(g.descricao||'')+'</div><div class="sub">'+sub+'</div><span class="badge">'+bdg+'</span></div><div class="amt">'+brl(num(g.valor))+'<div class="sub" style="font-weight:400">'+mlab2(g.data)+'</div></div></div>';});document.getElementById('tl').innerHTML=tl||'<div class="small">sem lançamentos nesse mês</div>';document.getElementById('tlMes').textContent=mlab(SEL);
 var sobra=renda-totDebita;var p30=renda*0.3,p40=renda*0.4;var usouReserva=sobra<0;var pct=renda>0?Math.max(0,Math.min(100,(sobra/p30)*100)):0;var cor=usouReserva?'#5b8def':(sobra>=p40?'#27c498':(sobra>=p30?'#ffa53b':'#ff6b5b'));
 document.getElementById('meta').innerHTML=(usouReserva?('<div class="small">Usou <b style="color:'+cor+'">'+brl0(Math.abs(sobra))+'</b> da reserva pra fechar o mês</div><div class="bar"><i style="width:100%;background:'+cor+'"></i></div><div class="small">renda '+brl0(renda)+' · saiu de verdade '+brl0(totDebita)+'</div>'):('<div class="small">Sobrou esse mês: <b style="color:'+cor+'">'+brl0(sobra)+'</b> de renda '+brl0(renda)+'</div><div class="bar"><i style="width:'+pct+'%;background:'+cor+'"></i></div><div class="small">meta 30% = '+brl0(p30)+' · meta 40% = '+brl0(p40)+'</div>'))+'<div class="small" style="margin-top:6px;color:#9aa3af">saiu de verdade '+brl0(totDebita)+' · no cartão (paga na fatura) '+brl0(tot-totDebita)+'</div>';
-var rh='';(DATA.reservas||[]).forEach(function(r){rh+='<div class="li"><div><div class="desc">'+(r.nome||'')+'</div><div class="sub">'+(r.instituicao||'')+'</div></div><div class="amt">'+brl(num(r.saldo))+'</div></div>';});document.getElementById('res').innerHTML=rh;renderSextas();renderEstabs();}
+var rh='';(DATA.reservas||[]).forEach(function(r){rh+='<div class="li"><div><div class="desc">'+(r.nome||'')+'</div><div class="sub">'+(r.instituicao||'')+'</div></div><div class="amt">'+brl(num(r.saldo))+'</div></div>';});document.getElementById('res').innerHTML=rh;renderSextas();renderPrev();}
 function normEstab(s){s=(s||'').toLowerCase().trim();s=s.replace(/s[ãa]o goncalobra$/,'').replace(/\s*bra$/,'').replace(/\s*ltda$/,'').replace(/\s*-?\s*\d+$/,'').replace(/[*].*$/,'').replace(/\s+/g,' ').trim();return s?s.charAt(0).toUpperCase()+s.slice(1):'(sem nome)';}
-function renderEstabs(){var el=document.getElementById('estabs');if(!el)return;var map={};DATA.gastos.forEach(function(g){if(!inSel(g))return;var cat=g.categoria||'';if(cat==='Cartão (fatura)')return;var k=normEstab(g.descricao);if(!map[k])map[k]={nome:k,total:0,vezes:0};map[k].total+=num(g.valor);map[k].vezes+=1;});var arr=Object.keys(map).map(function(k){return map[k];}).filter(function(o){return o.total>0;}).sort(function(a,b){return b.total-a.total;}).slice(0,8);if(!arr.length){el.innerHTML='<div class="small">sem lançamentos nesse período</div>';return;}var max=arr[0].total;var h='';arr.forEach(function(o,i){var hot=o.vezes>=3;var w=Math.max(4,Math.round(o.total/max*100));h+='<div class="est-row'+(hot?' hot':'')+'"><div class="est-rank">'+(i+1)+'</div><div style="flex:1;min-width:0"><div class="est-name">'+o.nome+'</div><div class="est-sub">'+o.vezes+'x'+(hot?' · você vai muito aqui':'')+'</div><div class="est-bar"><i style="width:'+w+'%"></i></div></div><div class="est-val">'+brl0(o.total)+'</div></div>';});el.innerHTML=h;}
+function ymOf(d){return (d||'').slice(0,7);}
+function monthBounds(ym){if(ym==='todos'){var n=new Date();ym=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');}return ym;}
+function renderPrev(){var el=document.getElementById('prev');if(!el)return;var ym=monthBounds(SEL);var todayISO=new Date().toISOString().slice(0,10);
+// saldo em caixa atual
+var caixa=0;(DATA.contas||[]).forEach(function(c){caixa+=num(c.saldo);});
+// renda do mês: total e a que ainda vai entrar (data > hoje)
+var rendaMes=0,rendaFut=0;(DATA.renda||[]).forEach(function(r){if(ymOf(r.data)!==ym)return;var v=num(r.valor);rendaMes+=v;if((r.data||'')>todayISO)rendaFut+=v;});
+// gastos que já debitaram no mês
+var saiu=0;(DATA.gastos||[]).forEach(function(g){if(ymOf(g.data)!==ym)return;if(g.debita_caixa===false||g.debita_caixa==='false')return;saiu+=num(g.valor);});
+// previstos que ainda vão debitar até o fim do mês (gastos_previstos pagos=false desse mês)
+var prevList=[];var prevTot=0;(DATA.previstos||[]).forEach(function(p){if(p.pago)return;if(ymOf(p.data_prevista)!==ym)return;var v=num(p.valor);prevTot+=v;prevList.push({nome:p.descricao,data:p.data_prevista,valor:v});});
+// faturas de cartão previstas que vencem nesse mês (debitam quando pagas)
+(DATA.faturas||[]).forEach(function(f){if(f.pago)return;if(ymOf(f.vencimento)!==ym)return;var v=num(f.valor);prevTot+=v;prevList.push({nome:'Fatura '+(f.cartao||''),data:f.vencimento,valor:v});});
+prevList.sort(function(a,b){return a.data<b.data?-1:1;});
+// grana que tenho esse mês = caixa + renda que ainda entra
+var disp=caixa+rendaFut;
+// sobra = disponível - previsto a sair
+var sobra=disp-prevTot;
+var h='';
+h+='<div class="pv-line"><div class="lab">Grana disponível<small>caixa '+brl(caixa)+' + renda a entrar '+brl(rendaFut)+'</small></div><div class="val">'+brl(disp)+'</div></div>';
+h+='<div class="pv-line"><div class="lab">Já saiu no mês</div><div class="val pv-out">− '+brl(saiu)+'</div></div>';
+h+='<div class="pv-line"><div class="lab">Previsto até fim do mês</div><div class="val pv-out">− '+brl(prevTot)+'</div></div>';
+h+='<div class="pv-line tot"><div class="lab">Sobra prevista</div><div class="val '+(sobra>=0?'pv-pos':'pv-neg')+'">'+brl(sobra)+'</div></div>';
+if(prevList.length){h+='<div class="pv-list"><div class="small" style="margin:6px 0 2px">a pagar ainda:</div>';prevList.forEach(function(p){h+='<div class="pv-item"><span>'+p.nome+' · '+mlab2(p.data)+'</span><span>'+brl(p.valor)+'</span></div>';});h+='</div>';}
+if(sobra>0){h+='<div class="pv-carry">↳ sobra de '+brl(sobra)+' entra como saldo no próximo mês</div>';}
+el.innerHTML=h;
+// reflete a sobra prevista também no card de Meta/investimento (se quiser ver lá)
+}
+function renderEstabs(){return;}
 function renderSextas(){var now=new Date();var y,mo;if(SEL==='todos'){y=now.getFullYear();mo=now.getMonth();}else{var sp=SEL.split('-');y=parseInt(sp[0],10);mo=parseInt(sp[1],10)-1;}var fridays=[];var d=new Date(y,mo,1);while(d.getMonth()===mo){if(d.getDay()===5)fridays.push(new Date(d));d.setDate(d.getDate()+1);}var today=new Date();today.setHours(0,0,0,0);var sal=3500,inv=Math.round(sal*0.4);var h='';for(var i=0;i<fridays.length;i++){var f=fridays[i];var dd=String(f.getDate()).padStart(2,'0');var isNow=f.getTime()===today.getTime()||(i<fridays.length-1&&today>=fridays[i]&&today<fridays[i+1])||(i===fridays.length-1&&today>=fridays[i]);var next=false;if(!next){for(var j=0;j<fridays.length;j++){if(fridays[j]>=today){if(j===i)next=true;break;}}}var cls='sex-card'+(next?' now sex-star':'');h+='<div class="'+cls+'"><div class="sl">SEX</div><div class="sd">'+dd+'</div><div class="sv">R$ '+sal.toLocaleString('pt-BR')+'</div><div class="si">↑ R$ '+inv.toLocaleString('pt-BR')+'</div></div>';}document.getElementById('sextas').innerHTML=h;}
 var CARD_SEL='Mercado Pago',CARD_PAGE=0,CARD_PP=6;
 function cardList(){var s={};DATA.gastos.forEach(function(g){if(g.categoria==='Cartões'&&g.subcategoria)s[g.subcategoria]=1;});(DATA.faturas||[]).forEach(function(f){if(f.cartao)s[f.cartao]=1;});var arr=Object.keys(s).sort();if(!arr.length)arr=['Mercado Pago'];return arr;}
@@ -172,6 +212,7 @@ var nodes=el.querySelectorAll('.cbar');for(var k=0;k<nodes.length;k++){(function
 function buildLine(){var cats=KEEP.concat(['Família e outros']);var ds=cats.map(function(c){var data=MONTHS.map(function(m){var s=0;DATA.gastos.forEach(function(g){if(gm(g)===m&&grp(g.categoria)===c)s+=num(g.valor);});return Math.round(s*100)/100;});return{label:c,data:data,borderColor:col(c),backgroundColor:col(c),tension:.35,borderWidth:2,pointRadius:2,fill:false};});var ctx=document.getElementById('line');if(lineChart)lineChart.destroy();lineChart=new Chart(ctx,{type:'line',data:{labels:MONTHS.map(mlab),datasets:ds},options:{maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{boxWidth:10,boxHeight:10,font:{size:10},padding:8,usePointStyle:true}},tooltip:{callbacks:{label:function(c){return c.dataset.label+': '+brl(c.parsed.y);}}}},scales:{y:{ticks:{callback:function(v){return 'R$'+(v>=1000?(v/1000)+'k':v);},font:{size:10}},grid:{color:'#f0f2f6'}},x:{ticks:{font:{size:11}},grid:{display:false}}}}});}
 start();
 </script></body></html>
+
 
 
 
