@@ -18,10 +18,10 @@ h1,h2,h3{font-family:'Bricolage Grotesque',Inter,sans-serif;margin:0;letter-spac
 .card{background:var(--card);border-radius:20px;padding:17px;margin:12px 0;box-shadow:0 1px 3px rgba(20,30,50,.05)}
 .ttl{font-size:19px;font-weight:800;margin-bottom:6px}
 .mut{color:var(--mut)}
-.hero{display:grid;grid-template-columns:1fr;gap:10px}
-.h{background:var(--card);border-radius:18px;padding:18px;box-shadow:0 1px 3px rgba(20,30,50,.05)}
-.h .lab{font-size:16px;color:var(--mut);font-weight:600}
-.h .val{font-size:34px;font-weight:800;font-family:'Bricolage Grotesque',Inter;margin-top:5px}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.h{background:var(--card);border-radius:18px;padding:14px;box-shadow:0 1px 3px rgba(20,30,50,.05)}
+.h .lab{font-size:12px;color:var(--mut);font-weight:600}
+.h .val{font-size:21px;font-weight:800;font-family:'Bricolage Grotesque',Inter;margin-top:3px}
 .selrow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 0 14px}
 .selstack{display:flex;flex-direction:column;gap:8px;margin:2px 0 14px}
 .selstack .sr{display:flex;align-items:center;gap:10px}
@@ -40,7 +40,6 @@ select{appearance:none;-webkit-appearance:none;background:#f4f6fa url('data:imag
 .srow{display:flex;align-items:center;gap:8px;padding:2px 0 2px 19px;font-size:12.5px;color:#56616f}
 .srow .sd{width:7px;height:7px;border-radius:3px;opacity:.55}
 .srow .v{margin-left:auto;font-variant-numeric:tabular-nums}
-@media (max-width:600px){.trow{font-size:18px}.srow{font-size:16px}}
 .tl{margin-top:4px}
 .li{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .li:first-child{border-top:none}
@@ -56,14 +55,14 @@ select{appearance:none;-webkit-appearance:none;background:#f4f6fa url('data:imag
 #login input{width:100%;padding:12px;border:1px solid #e6eaf0;border-radius:12px;font-size:15px;margin:10px 0}
 #login button{width:100%;padding:12px;border:none;border-radius:12px;background:#ff6b5b;color:#fff;font-weight:700;font-size:15px}
 .err{color:#e03b3b;font-size:13px;min-height:16px}
-.small{font-size:18px;color:var(--mut)}
-.sex-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
-.sex-card{background:#f8f9fb;border-radius:18px;padding:24px 15px;text-align:center;border:1.5px solid transparent}
+.small{font-size:12px;color:var(--mut)}
+.sex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.sex-card{background:#f8f9fb;border-radius:14px;padding:12px 6px;text-align:center;border:1.5px solid transparent}
 .sex-card.now{background:#fffbef;border-color:#f5d97a}
-.sex-card .sl{font-size:17px;color:var(--mut);font-weight:600;margin-bottom:3px}
-.sex-card .sd{font-size:39px;font-weight:800;font-family:'Bricolage Grotesque',Inter}
-.sex-card .sv{font-size:18px;color:var(--mut);margin-top:9px}
-.sex-card .si{font-size:19px;font-weight:600;color:#27c498;margin-top:5px}
+.sex-card .sl{font-size:11px;color:var(--mut);font-weight:600;margin-bottom:2px}
+.sex-card .sd{font-size:22px;font-weight:800;font-family:'Bricolage Grotesque',Inter}
+.sex-card .sv{font-size:12px;color:var(--mut);margin-top:6px}
+.sex-card .si{font-size:12.5px;font-weight:600;color:#27c498;margin-top:3px}
 .sex-star{position:relative}
 .sex-star::after{content:'⭐';position:absolute;top:-8px;right:-2px;font-size:14px}
 .est-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
@@ -131,7 +130,7 @@ function boot(){var set={};DATA.gastos.forEach(function(g){var m=gm(g);if(m)set[
 function shell(){var opts='<option value="todos">Todos os meses</option>';for(var i=MONTHS.length-1;i>=0;i--){opts+='<option value="'+MONTHS[i]+'">'+mlab(MONTHS[i])+'</option>';}
 var cats=KEEP.concat(['Família e outros']);var copts='<option value="todas">Todas as categorias</option>';cats.forEach(function(c){copts+='<option value="'+c+'">'+c+'</option>';});
 var h='<h1 style="font-size:24px;margin:6px 2px 2px">Controle</h1><div class="small" style="margin:0 2px 8px">seu dinheiro, de verdade</div>'
-+'<div class="hero"><div class="h"><div class="lab">Caixa agora</div><div class="val" id="hCaixa">-</div><div class="sub" id="hCaixaSync" style="font-size:18px;color:#9aa3af;margin-top:5px"></div></div><div class="h"><div class="lab">Saiu no mês</div><div class="val" id="hSaiu">-</div><div class="sub" id="hSaiuDet" style="font-size:18px;color:#9aa3af;margin-top:6px;line-height:1.6"></div></div><div class="h"><div class="lab">Renda atual</div><div class="val" id="hRendaAtual">-</div><div class="sub" id="hRendaDet" style="font-size:18px;color:#9aa3af;margin-top:6px;line-height:1.6"></div></div><div class="h"><div class="lab">Renda do mês</div><div class="val" id="hRenda">-</div></div></div>'
++'<div class="hero"><div class="h"><div class="lab">Caixa agora</div><div class="val" id="hCaixa">-</div><div class="sub" id="hCaixaSync" style="font-size:10.5px;color:#9aa3af;margin-top:2px"></div></div><div class="h"><div class="lab">Saiu no mês</div><div class="val" id="hSaiu">-</div><div class="sub" id="hSaiuDet" style="font-size:11px;color:#9aa3af;margin-top:3px;line-height:1.5"></div></div><div class="h"><div class="lab">Renda atual</div><div class="val" id="hRendaAtual">-</div><div class="sub" id="hRendaDet" style="font-size:11px;color:#9aa3af;margin-top:3px;line-height:1.5"></div></div><div class="h"><div class="lab">Renda do mês</div><div class="val" id="hRenda">-</div></div></div>'
 +'<div class="card"><div class="ttl">Ritmo das sextas</div><div class="small" style="margin-bottom:2px">R$ 3.500 entram toda sexta. O verde é o quanto investir em cada uma (40%).</div><div class="sex-grid" id="sextas"></div></div>'
 +'<div class="card"><div class="ttl">Meta de investimento</div><div id="meta"></div></div>'
 +'<div class="card"><div class="ttl">Reservas guardadas</div><div id="res"></div></div>'
