@@ -79,8 +79,11 @@ select{appearance:none;-webkit-appearance:none;background:#f4f6fa url('data:imag
 .lineWrap{height:230px;margin-top:6px}
 #login{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;z-index:9}
 #login .box{background:#fff;border-radius:20px;padding:22px;width:100%;max-width:320px;box-shadow:0 6px 24px rgba(20,30,50,.10)}
-#login input{width:100%;padding:12px;border:1px solid #e6eaf0;border-radius:12px;font-size:15px;margin:10px 0}
-#login button{width:100%;padding:12px;border:none;border-radius:12px;background:#ff6b5b;color:#fff;font-weight:700;font-size:15px}
+#login input{width:100%;padding:12px;border:1px solid #e6eaf0;border-radius:12px;font-size:15px;margin:10px 0;box-sizing:border-box}
+#login button{width:100%;padding:12px;border:none;border-radius:12px;background:#ff6b5b;color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+#login .pw-wrap{position:relative}
+#login .pw-wrap input{padding-right:42px}
+#login .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:#9aa3af;width:28px;height:28px}
 .err{color:#e03b3b;font-size:13px;min-height:16px}
 .small{font-size:12px;color:var(--mut)}
 .sex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
@@ -130,7 +133,7 @@ select{appearance:none;-webkit-appearance:none;background:#f4f6fa url('data:imag
 .cbar-out b{font-size:20px;font-weight:800;font-family:'Bricolage Grotesque',Inter}
 .cbar-out span{display:block;font-size:12px;color:var(--mut);margin-top:1px}
 </style></head><body>
-<div id="login"><div class="box"><h2 style="font-size:20px">Controle</h2><div class="small" style="margin-top:4px">Digite a senha pra abrir</div><input id="pw" type="password" placeholder="senha" autocomplete="current-password"/><div class="err" id="lerr"></div><button onclick="submitPw()">Entrar</button></div></div>
+<div id="login"><div class="box"><h2 style="font-size:20px">Controle</h2><div class="small" style="margin-top:4px">Digite a senha pra abrir</div><div class="pw-wrap"><input id="pw" type="password" placeholder="senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')submitPw()"/><button type="button" class="eye" id="eyeBtn" onclick="toggleEye()" aria-label="mostrar senha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="err" id="lerr"></div><button onclick="submitPw()">Entrar</button></div></div>
 <div id="app" class="wrap" style="display:none"></div>
 <script>
 var BASE='https://imlyadazvnzlcyakgpug.supabase.co/functions/v1/painel';
@@ -148,6 +151,7 @@ function mlab2(d){if(!d)return '';var p=d.split('-');return p[2]+'/'+p[1];}
 function grp(c){return KEEP.indexOf(c)>=0?c:'Família e outros';}
 function col(c){return CMAP[c]||'#b3bcc8';}
 function inSel(g){return SEL==='todos'||gm(g)===SEL;}
+function toggleEye(){var p=document.getElementById('pw'),b=document.getElementById('eyeBtn');if(!p)return;var show=p.type==='password';p.type=show?'text':'password';b.innerHTML=show?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';p.focus();}
 function submitPw(){var v=document.getElementById('pw').value;if(!v)return;fetchData(v);}
 function logout(){localStorage.removeItem('painel_pw');location.reload();}
 function showLogin(msg){document.getElementById('app').style.display='none';document.getElementById('login').style.display='flex';document.getElementById('lerr').textContent=msg||'';}
