@@ -176,18 +176,18 @@ function renderContas(){var el=document.getElementById('contas');if(!el)return;v
 function renderEstabs(){return;}
 function renderSextas(){var now=new Date();var y,mo;if(SEL==='todos'){y=now.getFullYear();mo=now.getMonth();}else{var sp=SEL.split('-');y=parseInt(sp[0],10);mo=parseInt(sp[1],10)-1;}var fridays=[];var d=new Date(y,mo,1);while(d.getMonth()===mo){if(d.getDay()===5)fridays.push(new Date(d));d.setDate(d.getDate()+1);}var today=new Date();today.setHours(0,0,0,0);var sal=3500,inv=Math.round(sal*0.4);var h='';for(var i=0;i<fridays.length;i++){var f=fridays[i];var dd=String(f.getDate()).padStart(2,'0');var isNow=f.getTime()===today.getTime()||(i<fridays.length-1&&today>=fridays[i]&&today<fridays[i+1])||(i===fridays.length-1&&today>=fridays[i]);var next=false;if(!next){for(var j=0;j<fridays.length;j++){if(fridays[j]>=today){if(j===i)next=true;break;}}}var cls='sex-card'+(next?' now sex-star':'');h+='<div class="'+cls+'"><div class="sl">SEX</div><div class="sd">'+dd+'</div><div class="sv">R$ '+sal.toLocaleString('pt-BR')+'</div><div class="si">↑ R$ '+inv.toLocaleString('pt-BR')+'</div></div>';}document.getElementById('sextas').innerHTML=h;}
 var CARD_SEL='Mercado Pago',CARD_PAGE=0,CARD_PP=6;
-function cardList(){var s={};DATA.gastos.forEach(function(g){if(g.categoria==='Cartões'&&g.subcategoria)s[g.subcategoria]=1;});(DATA.faturas||[]).forEach(function(f){if(f.cartao)s[f.cartao]=1;});var arr=Object.keys(s).sort();if(!arr.length)arr=['Mercado Pago'];return arr;}
-var CARD_CLOSE={'Mercado Pago':9};
-function faturaVenc(dataISO,diaFecha){if(!dataISO)return null;var p=dataISO.slice(0,10).split('-');var y=+p[0],mo=+p[1],d=+p[2];
-// fecha dia X: gasto até o dia X entra na fatura que vence neste mês; depois do dia X, no mês seguinte
-var vy=y,vm=mo;if(d>diaFecha){vm=mo+1;if(vm>12){vm=1;vy+=1;}}
+function cardList(){var s={};DATA.gastos.forEach(function(g){if(g.categoria==='Cartões'&&g.subcategoria)s[g.subcategoria]=1;if(g.cartao&&(g.debita_caixa===false||g.debita_caixa==='false'))s[g.cartao]=1;});(DATA.faturas||[]).forEach(function(f){if(f.cartao)s[f.cartao]=1;});var arr=Object.keys(s).sort();if(!arr.length)arr=['Mercado Pago'];return arr;}
+var CARD_CLOSE={'Mercado Pago':{f:9,off:0},'Itaú':{f:25,off:1},'Nu Empresa':{f:20,off:0}};
+function faturaVenc(dataISO,diaFecha,off){if(!dataISO)return null;var p=dataISO.slice(0,10).split('-');var y=+p[0],mo=+p[1],d=+p[2];
+// fecha dia X; compra apos o dia X cai no proximo ciclo. off = meses do fechamento ate o vencimento (0=mesmo mes, 1=mes seguinte)
+var vy=y,vm=mo+(d>diaFecha?1:0)+(off||0);while(vm>12){vm-=12;vy+=1;}
 return vy+'-'+String(vm).padStart(2,'0');}
 function renderCartoes(){var el=document.getElementById('cbars');if(!el)return;var selEl=document.getElementById('cardSel');var cards=cardList();if(selEl&&selEl.options.length!==cards.length){var so='';cards.forEach(function(c){so+='<option value="'+c+'">'+c+'</option>';});selEl.innerHTML=so;}
 if(selEl&&selEl.value&&selEl.value!==CARD_SEL){CARD_SEL=selEl.value;CARD_PAGE=0;}
 if(cards.indexOf(CARD_SEL)<0)CARD_SEL=cards[0];if(selEl)selEl.value=CARD_SEL;
 var map={};DATA.gastos.forEach(function(g){if(g.categoria!=='Cartões'||g.subcategoria!==CARD_SEL)return;var m=gm(g);if(!m)return;if(!map[m])map[m]={mes:m,valor:0,prev:false};map[m].valor+=num(g.valor);});(DATA.faturas||[]).forEach(function(f){if((f.cartao||'')!==CARD_SEL||f.pago)return;var m=(f.vencimento||'').slice(0,7);if(!m)return;if(!map[m])map[m]={mes:m,valor:0,prev:true};map[m].valor+=num(f.valor);map[m].prev=true;});
 // Soma gastos no cartão (nao faturados) na fatura futura conforme ciclo de fechamento
-var fecha=CARD_CLOSE[CARD_SEL];if(fecha){DATA.gastos.forEach(function(g){if(g.debita_caixa!==false&&g.debita_caixa!=='false')return;if((g.cartao||'')!==CARD_SEL)return;var fm=faturaVenc(g.data,fecha);if(!fm)return;if(!map[fm])map[fm]={mes:fm,valor:0,prev:true};map[fm].valor+=num(g.valor);map[fm].prev=true;});}
+var cc=CARD_CLOSE[CARD_SEL];if(cc){DATA.gastos.forEach(function(g){if(g.debita_caixa!==false&&g.debita_caixa!=='false')return;if((g.cartao||'')!==CARD_SEL)return;var fm=faturaVenc(g.data,cc.f,cc.off);if(!fm)return;if(!map[fm])map[fm]={mes:fm,valor:0,prev:true};map[fm].valor+=num(g.valor);map[fm].prev=true;});}
 var all=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.mes<b.mes?-1:1;});
 var out=document.getElementById('cbarOut');
 if(!all.length){el.innerHTML='<div class="small">sem faturas desse cartão</div>';out.innerHTML='<b>-</b><span>sem dados</span>';document.getElementById('cprev').className='cnav';document.getElementById('cnext').className='cnav';return;}
